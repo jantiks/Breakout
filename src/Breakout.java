@@ -3,6 +3,7 @@ This file will eventually implement the game of Breakout.
  */
 import acm.program.*;
 import acm.graphics.*;
+import acm.util.RandomGenerator;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -45,19 +46,39 @@ public class Breakout extends GraphicsProgram {
     /** Offset of the top brick row from the top */
     private static final int BRICK_Y_OFFSET = 70;
 
+    //dellay of timer
+    private static final int DELAY = 30;
+
     /** Number of turns */
     private static final int NTURNS = 3;
     // runs the program
     public void run() {
         setup();
+        while (true) {
+            moveBall();
+            checkForCollision();
+            pause(DELAY);
+        }
+
     }
     // initial setup
     private void setup() {
+        // init of vx and vy
+        vx = rgen.nextDouble(1,3);
+        if (rgen.nextBoolean(0.5)) vx = -vx;
+        vy = 3;
         makeBricks();
         makePaddle();
+        makeBall();
         addMouseListeners();
     }
-    // makeing paddle
+
+    private void makeBall() {
+        ball = new GOval((getWidth() - BALL_RADIUS ) / 2, (getHeight() - BALL_RADIUS) / 2, BALL_RADIUS, BALL_RADIUS);
+        ball.setFilled(true);
+        add(ball);
+    }
+    // making paddle
     private void makePaddle() {
         paddle = new GRect((WIDTH / 2) - (PADDLE_WIDTH / 2),HEIGHT - PADDLE_Y_OFFSET, PADDLE_WIDTH, PADDLE_HEIGHT);
         paddle.setFilled(true);
@@ -97,6 +118,26 @@ public class Breakout extends GraphicsProgram {
             }
         }
     }
+    //find if collision with edges or flor and update velocities
+    private void checkForCollision() {
+        if (ball.getY() > HEIGHT - 2 * BALL_RADIUS) {
+            vy = - vy;
+        }
+        if (ball.getX() > WIDTH - 2 * BALL_RADIUS) {
+            vx = - vx;
+        }
+        if (ball.getX() < 0) {
+            vx = -vx;
+        }
+        if (ball.getY() < 0) {
+            vy = -vy;
+        }
+    }
+
+    //moving ball
+    private void moveBall() {
+        ball.move(vx, vy);
+    }
     // Called on mouse press to record the coordinates of the click */
     public void mousePressed(MouseEvent mouseEvent) {
         if (paddle.contains(mouseEvent.getX(), mouseEvent.getY())) {
@@ -122,5 +163,13 @@ public class Breakout extends GraphicsProgram {
 
     // instance variables
     private GRect paddle;
+    private GOval ball;
+
+    // x and y velocities
+    private double vx, vy;
+
+    // random generator
+    private RandomGenerator rgen = RandomGenerator.getInstance();
+
     private GPoint currentPosition;
 }
