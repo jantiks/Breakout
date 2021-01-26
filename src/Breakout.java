@@ -41,7 +41,7 @@ public class Breakout extends GraphicsProgram {
     private static final int BRICK_HEIGHT = 8;
 
     /** Radius of the ball in pixels */
-    private static final int BALL_RADIUS = 10;
+    private static final int BALL_RADIUS = 15;
 
     /** Offset of the top brick row from the top */
     private static final int BRICK_Y_OFFSET = 70;
@@ -54,10 +54,22 @@ public class Breakout extends GraphicsProgram {
     // runs the program
     public void run() {
         setup();
-        while (true) {
+        while (brickCount > 0 && ball.getY() < HEIGHT - 2 * BALL_RADIUS) {
             moveBall();
             checkForCollision();
             pause(DELAY);
+        }
+        ball.setVisible(false);
+        if (brickCount == 0) {
+            GLabel label = new GLabel("You Won , Congratulations");
+            label.setFont("Helvetica-24");
+            label.setColor(Color.BLACK);
+            add(label, (WIDTH - label.getWidth()) / 2, (HEIGHT - label.getAscent()) / 2);
+        } else {
+            GLabel label = new GLabel("Game over");
+            label.setFont("Helvetica-24");
+            label.setColor(Color.BLACK);
+            add(label, (WIDTH - label.getWidth()) / 2, (HEIGHT - label.getAscent()) / 2);
         }
 
     }
@@ -66,7 +78,7 @@ public class Breakout extends GraphicsProgram {
         // init of vx and vy
         vx = rgen.nextDouble(3,6);
         if (rgen.nextBoolean(0.5)) vx = -vx;
-        vy = 6;
+        vy = 4;
         makeBricks();
         makePaddle();
         makeBall();
@@ -116,6 +128,8 @@ public class Breakout extends GraphicsProgram {
                 // adding to canvas
                 add(brick);
             }
+            // all bricks counting
+            brickCount = NBRICK_ROWS * NBRICKS_PER_ROW;
         }
     }
     //find if there is collision and update velocities
@@ -133,10 +147,11 @@ public class Breakout extends GraphicsProgram {
         // if ball touched paddle
         GObject collider = getCollidingObject();
         if (collider == paddle) {
-            vy = -vy;
+            vy = -1.01 * vy;
         } else if (collider != null) {
             vy = -vy;
             remove(collider);
+            brickCount -= 1;
         }
 
     }
@@ -146,15 +161,17 @@ public class Breakout extends GraphicsProgram {
         double x = ball.getX();
         double y = ball.getY();
         GObject element = getElementAt(x,y);
+
         if (element == null) {
             element = getElementAt(x + 2 * BALL_RADIUS,y);
+            if (element == null) {
+                element = getElementAt(x,2 * BALL_RADIUS + y);
+                if (element == null) {
+                    element = getElementAt(x + 2 * BALL_RADIUS,2 * BALL_RADIUS + y);
+                }
+            }
         }
-        if (element == null) {
-            element = getElementAt(x,2 * BALL_RADIUS + y);
-        }
-        if (element == null) {
-            element = getElementAt(x + 2 * BALL_RADIUS,2 * BALL_RADIUS + y);
-        }
+
         return  element;
     }
 
@@ -191,6 +208,9 @@ public class Breakout extends GraphicsProgram {
 
     // x and y velocities
     private double vx, vy;
+
+    // quantity of bricks
+    private int brickCount;
 
     // random generator
     private RandomGenerator rgen = RandomGenerator.getInstance();
