@@ -108,8 +108,10 @@ public class Breakout extends GraphicsProgram {
     // Called on mouse drag to reposition the object
     public void mouseDragged(MouseEvent mouseEvent) {
         if (currentPosition != null) {
-            if (currentPosition.getX() > (WIDTH - PADDLE_WIDTH)) {
-                currentPosition = new GPoint(paddle.getX() + PADDLE_WIDTH, paddle.getY());
+            if (paddle.getX() > (WIDTH - PADDLE_WIDTH)) {
+                paddle.setLocation(paddle.getX() - 5, paddle.getY());
+            } else if (paddle.getX() < 0) {
+                paddle.setLocation( 5, paddle.getY());
             } else {
                 paddle.move(mouseEvent.getX() - currentPosition.getX(), 0);
                 currentPosition = new GPoint(mouseEvent.getPoint());
