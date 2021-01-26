@@ -64,9 +64,9 @@ public class Breakout extends GraphicsProgram {
     // initial setup
     private void setup() {
         // init of vx and vy
-        vx = rgen.nextDouble(1,3);
+        vx = rgen.nextDouble(3,6);
         if (rgen.nextBoolean(0.5)) vx = -vx;
-        vy = 3;
+        vy = 6;
         makeBricks();
         makePaddle();
         makeBall();
@@ -118,20 +118,44 @@ public class Breakout extends GraphicsProgram {
             }
         }
     }
-    //find if collision with edges or flor and update velocities
+    //find if there is collision and update velocities
     private void checkForCollision() {
+        // if ball is touched with edges
         if (ball.getY() > HEIGHT - 2 * BALL_RADIUS) {
             vy = - vy;
-        }
-        if (ball.getX() > WIDTH - 2 * BALL_RADIUS) {
+        } else if (ball.getX() > WIDTH - 2 * BALL_RADIUS) {
             vx = - vx;
-        }
-        if (ball.getX() < 0) {
+        } else if (ball.getX() < 0) {
             vx = -vx;
-        }
-        if (ball.getY() < 0) {
+        } else if (ball.getY() < 0) {
             vy = -vy;
         }
+        // if ball touched paddle
+        GObject collider = getCollidingObject();
+        if (collider == paddle) {
+            vy = -vy;
+        } else if (collider != null) {
+            vy = -vy;
+            remove(collider);
+        }
+
+    }
+    // returns the object which was touched with ball
+    private GObject getCollidingObject() {
+        // cordinates of balls upper left corner
+        double x = ball.getX();
+        double y = ball.getY();
+        GObject element = getElementAt(x,y);
+        if (element == null) {
+            element = getElementAt(x + 2 * BALL_RADIUS,y);
+        }
+        if (element == null) {
+            element = getElementAt(x,2 * BALL_RADIUS + y);
+        }
+        if (element == null) {
+            element = getElementAt(x + 2 * BALL_RADIUS,2 * BALL_RADIUS + y);
+        }
+        return  element;
     }
 
     //moving ball
